@@ -31,7 +31,7 @@ const seed = async () => {
     isEmailVerified: true,
   });
 
-  const doctors = await User.insertMany([
+  const doctors = await User.create([
     {
       firstName: 'Arjun',
       lastName: 'Sharma',

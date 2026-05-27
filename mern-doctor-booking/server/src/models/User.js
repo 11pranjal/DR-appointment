@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema(
     emailVerificationToken: { type: String, select: false },
     emailVerificationExpires: { type: Date, select: false },
     doctorProfile: doctorProfileSchema,
+    deletionRequested: { type: Boolean, default: false },
+    deletionRequestedAt: { type: Date },
   },
   { timestamps: true }
 );

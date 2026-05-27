@@ -20,8 +20,8 @@ export default function Navbar() {
         Medi<span>Book</span>
       </Link>
       <nav>
-        <Link to="/doctors">Find doctors</Link>
-        <Link to="/track">Track appointment</Link>
+        <Link to="/doctors">Browse</Link>
+        <Link to="/posts">Awareness</Link>
         {!user && (
           <>
             <Link to="/login">Login</Link>
@@ -33,6 +33,7 @@ export default function Navbar() {
         {user && (
           <>
             {dashboardPath && <Link to={dashboardPath}>Dashboard</Link>}
+              {user?.role === 'doctor' && <Link to="/doctor/profile">Profile</Link>}
             <button
               type="button"
               className="btn btn-ghost btn-sm"

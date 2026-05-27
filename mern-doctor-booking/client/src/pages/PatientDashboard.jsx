@@ -17,12 +17,37 @@ export default function PatientDashboard() {
     load();
   };
 
+  const acceptProposed = async (id) => {
+    if (!window.confirm('Accept the proposed slot?')) return;
+    await api.post(`/appointments/${id}/accept`);
+    load();
+  };
+
   return (
     <div className="page">
       <h1>My appointments</h1>
-      <Link to="/doctors" className="btn btn-sm">
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <Link to="/doctors" className="btn btn-sm">
         Book new
-      </Link>
+        </Link>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={async () => {
+            if (!window.confirm('Request account deletion? Admin will confirm.')) return;
+            try {
+              const res = await api.get('/auth/me');
+              const id = res.data.user._id;
+              await api.delete(`/users/${id}`);
+              alert('Deletion requested. Admin will confirm.');
+            } catch (err) {
+              alert(err.response?.data?.message || 'Could not request deletion');
+            }
+          }}
+        >
+          Delete account
+        </button>
+      </div>
       <div className="table-wrap card">
         <table>
           <thead>
@@ -52,6 +77,14 @@ export default function PatientDashboard() {
                     <button type="button" className="btn btn-sm btn-outline" onClick={() => cancel(a._id)}>
                       Cancel
                     </button>
+                  )}
+                  {a.status === 'proposed' && (
+                    <>
+                      <div className="muted">Proposed: {a.proposedDate} {a.proposedTime}</div>
+                      <button type="button" className="btn btn-sm" onClick={() => acceptProposed(a._id)}>
+                        Accept proposed
+                      </button>
+                    </>
                   )}
                 </td>
               </tr>

@@ -18,6 +18,12 @@ const appointmentSchema = new mongoose.Schema(
     scheduleDate: { type: String, required: true },
     scheduleTime: { type: String, required: true },
     reason: { type: String, default: '' },
+    // Doctor-proposed alternative slot
+    proposedDate: { type: String },
+    proposedTime: { type: String },
+    proposedMessage: { type: String, default: '' },
+    proposedAt: { type: Date },
+    proposedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     status: {
       type: String,
       enum: ['pending', 'confirmed', 'completed', 'cancelled'],

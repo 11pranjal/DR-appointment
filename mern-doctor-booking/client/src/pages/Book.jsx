@@ -105,12 +105,55 @@ export default function Book() {
           <p className="error">Log in as a patient or book as guest (logout first).</p>
         )}
         <label>
-          Date
-          <input type="date" value={form.scheduleDate} onChange={set('scheduleDate')} required />
+          Date (pick or type)
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <select value={form.scheduleDate} onChange={set('scheduleDate')}>
+              <option value="">Select a date</option>
+              {Array.from({ length: 7 }).map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() + i);
+                const iso = d.toISOString().slice(0, 10);
+                const label = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+                return (
+                  <option value={iso} key={iso}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+            <input
+              type="date"
+              min="2026-01-01"
+              value={form.scheduleDate}
+              onChange={(e) => setForm({ ...form, scheduleDate: e.target.value })}
+            />
+          </div>
         </label>
         <label>
-          Time
-          <input type="time" value={form.scheduleTime} onChange={set('scheduleTime')} required />
+          Time (choose or type)
+          <div>
+            <div className="time-options">
+              {['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'].map((t) => (
+                <label key={t} className="time-radio">
+                  <input
+                    type="radio"
+                    name="scheduleTime"
+                    value={t}
+                    checked={form.scheduleTime === t}
+                    onChange={(e) => setForm({ ...form, scheduleTime: e.target.value })}
+                  />
+                  <span>{t}</span>
+                </label>
+              ))}
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <input
+                type="time"
+                value={form.scheduleTime}
+                onChange={(e) => setForm({ ...form, scheduleTime: e.target.value })}
+              />
+            </div>
+          </div>
         </label>
         <label>
           Reason for visit

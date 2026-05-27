@@ -79,11 +79,22 @@ exports.deleteUser = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  const user = await User.findByIdAndDelete(req.params.id);
+  const user = await User.findById(req.params.id);
   if (!user) {
     const err = new Error('User not found');
     err.statusCode = 404;
     throw err;
   }
-  res.json({ success: true, message: 'User deleted' });
+
+  // If admin requests deletion, perform immediate deletion
+  if (isAdmin) {
+    await user.deleteOne();
+    return res.json({ success: true, message: 'User deleted by admin' });
+  }
+
+  // If self-requesting deletion, mark deletionRequested for admin approval
+  user.deletionRequested = true;
+  user.deletionRequestedAt = new Date();
+  await user.save();
+  res.json({ success: true, message: 'Account deletion requested. Admin will confirm.' });
 });

@@ -1,13 +1,19 @@
 :root {
-  --bg: #0f1419;
-  --surface: #1a2332;
-  --border: #2d3a4f;
-  --text: #e8eef7;
-  --muted: #8b9cb3;
-  --accent: #3dd6c3;
-  --accent-dim: #2a9d8f;
-  --danger: #ff6b6b;
-  --radius: 12px;
+  /* Vibrant pastel palette */
+  --bg: linear-gradient(135deg, #fff0f6 0%, #f0fff6 25%, #fff7e6 50%, #f0efff 75%);
+  --surface: rgba(255,255,255,0.9);
+  --border: #f0e7ff; /* soft lavender border */
+  --text: #17202a; /* dark slate for readability */
+  --muted: #55606a;
+  --accent: linear-gradient(90deg, #ffd6e0 0%, #9be7c4 50%, #d6efff 100%); /* pink → mint → blue */
+  --accent-color: #8ce6c3; /* fallback solid accent */
+  --accent-dim: #7bd389;
+  --accent-2: #ffdedd; /* baby pink */
+  --accent-3: #fff5c2; /* butter yellow */
+  --accent-4: #e6deff; /* lavender */
+  --accent-5: #d6efff; /* baby blue */
+  --danger: #ff7b7b;
+  --radius: 14px;
   font-family: 'DM Sans', system-ui, sans-serif;
   color: var(--text);
   background: var(--bg);
@@ -71,25 +77,29 @@ body {
 
 .btn {
   display: inline-block;
-  background: var(--accent);
-  color: #0a0f14;
+  background: var(--accent-color);
+  color: #062023;
   border: none;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   font-size: 0.95rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
 }
 
 .btn:hover {
-  background: var(--accent-dim);
-  color: #fff;
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 30px rgba(23, 32, 42, 0.08);
+  background: linear-gradient(90deg, #ffd6e0 0%, #9be7c4 50%, #d6efff 100%);
+  color: #062023;
 }
 
 .btn-outline {
   background: transparent;
   border: 1px solid var(--accent);
   color: var(--accent);
+  transition: background-color 0.12s ease, color 0.12s ease, transform 0.12s ease;
 }
 
 .btn-sm {
@@ -105,6 +115,11 @@ body {
 .btn-ghost {
   background: transparent;
   color: var(--muted);
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  transform: translateY(-2px);
 }
 
 .card {
@@ -205,14 +220,105 @@ body {
   padding: 0.6rem 0.75rem;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--surface);
   color: var(--text);
+  transition: box-shadow 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+}
+
+.password-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.password-row input {
+  flex: 1;
+}
+
+.toggle-password-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.toggle-password-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.hero .hero-content {
+  text-align: center;
+  max-width: 720px;
+}
+
+.time-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.time-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+}
+
+.time-radio input {
+  margin: 0;
+}
+
+/* Input focus and subtle hover */
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+  outline: none;
+  border-color: var(--accent-dim);
+  box-shadow: 0 8px 28px rgba(139, 92, 255, 0.08);
+}
+
+.hero .hero-content h1 {
+  font-size: 2rem;
+  color: var(--text);
+}
+
+.hero .hero-content .lead {
+  color: var(--muted);
+}
+
+/* Card subtle gradient and hover */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(250,250,255,0.9) 100%);
+  border: 1px solid rgba(240,231,255,0.8);
+}
+
+.form-card label {
+  transition: color 0.12s ease;
+}
+
+.form-card label:hover {
+  color: var(--text);
 }
 
 .muted {
@@ -366,11 +472,12 @@ td {
 }
 
 .info-banner {
-  background: #1a3d32;
-  color: var(--accent);
+  background: linear-gradient(90deg, rgba(155,231,196,0.18), rgba(214,239,255,0.12));
+  color: var(--text);
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
   margin-bottom: 1rem;
+  border: 1px solid rgba(155,231,196,0.4);
 }
 
 .timeline {

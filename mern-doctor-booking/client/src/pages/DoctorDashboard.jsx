@@ -15,6 +15,20 @@ export default function DoctorDashboard() {
     load();
   };
 
+  const propose = async (id) => {
+    const proposedDate = window.prompt('Proposed date (YYYY-MM-DD):');
+    if (!proposedDate) return;
+    const proposedTime = window.prompt('Proposed time (HH:MM):');
+    if (!proposedTime) return;
+    const proposedMessage = window.prompt('Optional message to patient:') || '';
+    try {
+      await api.post(`/appointments/${id}/propose`, { proposedDate, proposedTime, proposedMessage });
+      load();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Could not propose slot');
+    }
+  };
+
   return (
     <div className="page">
       <h1>Doctor dashboard</h1>
@@ -51,6 +65,11 @@ export default function DoctorDashboard() {
                       onClick={() => updateStatus(a._id, 'confirmed')}
                     >
                       Confirm
+                    </button>
+                  )}
+                  {a.status !== 'completed' && (
+                    <button type="button" className="btn btn-sm btn-ghost" onClick={() => propose(a._id)}>
+                      Propose time
                     </button>
                   )}
                   {a.status === 'confirmed' && (

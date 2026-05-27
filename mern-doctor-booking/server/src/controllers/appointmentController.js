@@ -132,6 +132,99 @@ exports.updateAppointment = asyncHandler(async (req, res) => {
   res.json({ success: true, data: populated });
 });
 
+// POST /api/appointments/:id/propose — doctor proposes alternative slot
+exports.proposeAppointment = asyncHandler(async (req, res) => {
+  const appointment = await Appointment.findById(req.params.id);
+  if (!appointment) {
+    const err = new Error('Appointment not found');
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (!(req.user.role === 'doctor' && String(appointment.doctor) === String(req.user._id))) {
+    const err = new Error('Not allowed');
+    err.statusCode = 403;
+    throw err;
+  }
+
+  const { proposedDate, proposedTime, proposedMessage } = req.body;
+  if (!proposedDate || !proposedTime) {
+    const err = new Error('Proposed date and time required');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  appointment.proposedDate = proposedDate;
+  appointment.proposedTime = proposedTime;
+  appointment.proposedMessage = proposedMessage || '';
+  appointment.proposedAt = new Date();
+  appointment.proposedBy = req.user._id;
+  appointment.status = 'proposed';
+
+  await appointment.save();
+  const populated = await appointment.populate(populateAppointment);
+
+  // Notify patient (email) if present
+  try {
+    const sendEmail = require('../utils/sendEmail').sendEmail;
+    if (populated.patient?.email) {
+      await sendEmail({
+        to: populated.patient.email,
+        subject: 'Appointment time proposed by your doctor',
+        text: `Dr. ${req.user.firstName} proposed a new slot: ${proposedDate} ${proposedTime}. Message: ${proposedMessage || '—'}`,
+      });
+    } else if (populated.guestEmail) {
+      await sendEmail({
+        to: populated.guestEmail,
+        subject: 'Appointment time proposed by doctor',
+        text: `A new slot was proposed: ${proposedDate} ${proposedTime}. Message: ${proposedMessage || '—'}`,
+      });
+    }
+  } catch (e) {
+    // ignore email errors
+    console.error('Failed to send proposal email', e.message);
+  }
+
+  res.json({ success: true, data: populated });
+});
+
+// POST /api/appointments/:id/accept — patient accepts proposed slot
+exports.acceptProposed = asyncHandler(async (req, res) => {
+  const appointment = await Appointment.findById(req.params.id);
+  if (!appointment) {
+    const err = new Error('Appointment not found');
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const isPatient =
+    req.user.role === 'patient' && appointment.patient && String(appointment.patient) === String(req.user._id);
+  if (!isPatient) {
+    const err = new Error('Not allowed');
+    err.statusCode = 403;
+    throw err;
+  }
+
+  if (!appointment.proposedDate || !appointment.proposedTime) {
+    const err = new Error('No proposed slot to accept');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  appointment.scheduleDate = appointment.proposedDate;
+  appointment.scheduleTime = appointment.proposedTime;
+  appointment.proposedDate = undefined;
+  appointment.proposedTime = undefined;
+  appointment.proposedMessage = undefined;
+  appointment.proposedAt = undefined;
+  appointment.proposedBy = undefined;
+  appointment.status = 'confirmed';
+
+  await appointment.save();
+  const populated = await appointment.populate(populateAppointment);
+  res.json({ success: true, data: populated });
+});
+
 // DELETE /api/appointments/:id
 exports.deleteAppointment = asyncHandler(async (req, res) => {
   const appointment = await Appointment.findById(req.params.id);

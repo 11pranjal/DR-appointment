@@ -9,6 +9,7 @@ const {
   trackAppointment,
   getAllAppointments,
 } = require('../controllers/appointmentController');
+const { proposeAppointment, acceptProposed } = require('../controllers/appointmentController');
 const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
@@ -24,6 +25,8 @@ router.get('/', listAppointments);
 router.get('/all', authorize('admin'), getAllAppointments);
 router.get('/:id', getAppointmentById);
 router.post('/', authorize('patient'), createAppointment);
+router.post('/:id/propose', authorize('doctor'), proposeAppointment);
+router.post('/:id/accept', authorize('patient'), acceptProposed);
 router.put('/:id', updateAppointment);
 router.patch('/:id', updateAppointment);
 router.delete('/:id', deleteAppointment);

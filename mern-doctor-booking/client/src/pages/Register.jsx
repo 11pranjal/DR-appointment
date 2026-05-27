@@ -14,6 +14,7 @@ export default function Register() {
     specialization: '',
     city: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -72,7 +73,22 @@ export default function Register() {
         </label>
         <label>
           Password
-          <input type="password" value={form.password} onChange={set('password')} minLength={6} required />
+          <div className="password-row">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={form.password}
+              onChange={set('password')}
+              minLength={6}
+              required
+            />
+            <button
+              type="button"
+              className="toggle-password-btn"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
         </label>
         <label>
           Phone
