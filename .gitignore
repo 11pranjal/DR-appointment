@@ -1,0 +1,20 @@
+# Dependencies (reinstalled with npm install)
+node_modules/
+
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+
+# OS & editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Optional: uncomment if you use these tools
+# .vscode/
+# .idea/
