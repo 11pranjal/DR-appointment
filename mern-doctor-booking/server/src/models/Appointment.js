@@ -26,7 +26,7 @@ const appointmentSchema = new mongoose.Schema(
     proposedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'completed', 'cancelled'],
+      enum: ['pending', 'proposed', 'confirmed', 'completed', 'cancelled'],
       default: 'pending',
     },
     paymentStatus: {

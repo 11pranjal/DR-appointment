@@ -25,3 +25,34 @@ exports.getPostsByDoctor = asyncHandler(async (req, res) => {
   const posts = await Post.find({ doctor: req.params.id }).populate('doctor', 'firstName lastName');
   res.json({ success: true, data: posts });
 });
+
+// PUT /api/posts/:id — doctor only
+exports.updatePost = asyncHandler(async (req, res) => {
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    const err = new Error('Post not found');
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (String(post.doctor) !== String(req.user._id)) {
+    const err = new Error('Not allowed to edit this post');
+    err.statusCode = 403;
+    throw err;
+  }
+
+  const { title, imageUrl, content } = req.body;
+  if (!title || !content) {
+    const err = new Error('Title and content required');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  post.title = title;
+  post.imageUrl = imageUrl || '';
+  post.content = content;
+  await post.save();
+
+  const populated = await post.populate('doctor', 'firstName lastName');
+  res.json({ success: true, data: populated });
+});

@@ -4,11 +4,31 @@ import api from '../api/client';
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [deletionRequests, setDeletionRequests] = useState([]);
+
+  const loadStats = () => api.get('/admin/stats').then((res) => setStats(res.data.data));
+  const loadAppointments = () => api.get('/appointments/all').then((res) => setAppointments(res.data.data));
+  const loadDeletionRequests = () =>
+    api.get('/users?deletionRequested=true').then((res) => setDeletionRequests(res.data.data));
 
   useEffect(() => {
-    api.get('/admin/stats').then((res) => setStats(res.data.data));
-    api.get('/appointments/all').then((res) => setAppointments(res.data.data));
+    loadStats();
+    loadAppointments();
+    loadDeletionRequests();
   }, []);
+
+  const approveDeletion = async (id) => {
+    if (!window.confirm('Approve account deletion for this user?')) return;
+    await api.delete(`/users/${id}`);
+    loadDeletionRequests();
+    loadStats();
+  };
+
+  const denyDeletion = async (id) => {
+    if (!window.confirm('Deny deletion request for this user?')) return;
+    await api.put(`/users/${id}`, { deletionRequested: false });
+    loadDeletionRequests();
+  };
 
   return (
     <div className="page">
@@ -30,6 +50,10 @@ export default function AdminDashboard() {
           <div className="card stat">
             <strong>{stats.pendingAppointments}</strong>
             <span>Pending</span>
+          </div>
+          <div className="card stat">
+            <strong>{stats.deletionRequests}</strong>
+            <span>Delete requests</span>
           </div>
         </div>
       )}
@@ -57,6 +81,48 @@ export default function AdminDashboard() {
                 </td>
               </tr>
             ))}
+          </tbody>
+        </table>
+      </div>
+      <h2>Deletion requests</h2>
+      <div className="table-wrap card">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Requested At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deletionRequests.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="muted">
+                  No deletion requests pending.
+                </td>
+              </tr>
+            ) : (
+              deletionRequests.map((user) => (
+                <tr key={user._id}>
+                  <td>
+                    {user.firstName} {user.lastName}
+                  </td>
+                  <td>{user.email}</td>
+                  <td>{user.role}</td>
+                  <td>{new Date(user.deletionRequestedAt).toLocaleString()}</td>
+                  <td>
+                    <button type="button" onClick={() => approveDeletion(user._id)}>
+                      Confirm
+                    </button>
+                    <button type="button" onClick={() => denyDeletion(user._id)}>
+                      Deny
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

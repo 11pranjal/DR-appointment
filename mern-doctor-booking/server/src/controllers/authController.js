@@ -39,14 +39,15 @@ const sendVerificationEmail = async (user, token) => {
 // POST /api/auth/register
 exports.register = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, password, phone, role, doctorProfile } = req.body;
+  const normalizedEmail = email?.toLowerCase().trim();
 
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !normalizedEmail || !password) {
     const err = new Error('Please provide firstName, lastName, email, password');
     err.statusCode = 400;
     throw err;
   }
 
-  const exists = await User.findOne({ email });
+  const exists = await User.findOne({ email: normalizedEmail });
   if (exists) {
     const err = new Error('Email already registered');
     err.statusCode = 400;
@@ -59,7 +60,7 @@ exports.register = asyncHandler(async (req, res) => {
   const user = await User.create({
     firstName,
     lastName,
-    email,
+    email: normalizedEmail,
     password,
     phone,
     role: safeRole,
@@ -87,13 +88,15 @@ exports.register = asyncHandler(async (req, res) => {
 // POST /api/auth/login
 exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
+  const normalizedEmail = email?.toLowerCase().trim();
+
+  if (!normalizedEmail || !password) {
     const err = new Error('Email and password required');
     err.statusCode = 400;
     throw err;
   }
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email: normalizedEmail }).select('+password');
   if (!user || !(await user.matchPassword(password))) {
     const err = new Error('Invalid email or password');
     err.statusCode = 401;

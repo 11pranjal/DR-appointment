@@ -10,13 +10,18 @@ const publicUser = (user) => ({
   role: user.role,
   isEmailVerified: user.isEmailVerified,
   doctorProfile: user.doctorProfile,
+  deletionRequested: user.deletionRequested,
+  deletionRequestedAt: user.deletionRequestedAt,
   createdAt: user.createdAt,
 });
 
 // GET /api/users — admin
 exports.getUsers = asyncHandler(async (req, res) => {
-  const { role } = req.query;
-  const filter = role ? { role } : {};
+  const { role, deletionRequested } = req.query;
+  const filter = {};
+  if (role) filter.role = role;
+  if (deletionRequested !== undefined) filter.deletionRequested = deletionRequested === 'true';
+
   const users = await User.find(filter).select('-password').sort({ createdAt: -1 });
   res.json({ success: true, count: users.length, data: users.map(publicUser) });
 });
@@ -56,7 +61,7 @@ exports.updateUser = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  const { firstName, lastName, phone, doctorProfile, role } = req.body;
+  const { firstName, lastName, phone, doctorProfile, role, deletionRequested } = req.body;
   if (firstName !== undefined) user.firstName = firstName;
   if (lastName !== undefined) user.lastName = lastName;
   if (phone !== undefined) user.phone = phone;
@@ -64,6 +69,10 @@ exports.updateUser = asyncHandler(async (req, res) => {
     user.doctorProfile = { ...user.doctorProfile.toObject(), ...doctorProfile };
   }
   if (isAdmin && role) user.role = role;
+  if (isAdmin && deletionRequested === false) {
+    user.deletionRequested = false;
+    user.deletionRequestedAt = undefined;
+  }
 
   await user.save();
   res.json({ success: true, data: publicUser(user) });

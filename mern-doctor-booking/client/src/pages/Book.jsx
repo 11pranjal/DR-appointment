@@ -7,6 +7,7 @@ export default function Book() {
   const { id } = useParams();
   const { user } = useAuth();
   const [doctor, setDoctor] = useState(null);
+  const [doctorPosts, setDoctorPosts] = useState([]);
   const [form, setForm] = useState({
     scheduleDate: '',
     scheduleTime: '',
@@ -21,6 +22,7 @@ export default function Book() {
 
   useEffect(() => {
     api.get(`/doctors/${id}`).then((res) => setDoctor(res.data.data));
+    api.get(`/posts/doctor/${id}`).then((res) => setDoctorPosts(res.data.data)).catch(() => setDoctorPosts([]));
   }, [id]);
 
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
@@ -80,6 +82,20 @@ export default function Book() {
         Book Dr. {doctor.firstName} {doctor.lastName}
       </h1>
       <p className="muted">{doctor.doctorProfile?.specialization}</p>
+      {doctorPosts.length > 0 && (
+        <div className="card form-card">
+          <h2>Awareness posts by Dr. {doctor.firstName} {doctor.lastName}</h2>
+          {doctorPosts.map((post) => (
+            <div key={post._id} style={{ marginBottom: '1rem' }}>
+              <h3>{post.title}</h3>
+              {post.imageUrl && (
+                <img src={post.imageUrl} alt={post.title} style={{ width: '100%', borderRadius: 8, marginBottom: '0.75rem' }} />
+              )}
+              <p>{post.content}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <form className="card form-card" onSubmit={handleSubmit}>
         {error && <p className="error">{error}</p>}
         {!user && (
