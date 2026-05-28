@@ -45,9 +45,14 @@ export default function Doctors() {
               {d.doctorProfile?.clinicName} · {d.doctorProfile?.city}
             </p>
             <p className="fee">Rs. {d.doctorProfile?.consultationFee}</p>
-            <Link to={`/doctors/${d._id}/book`} className="btn btn-sm btn-block">
-              Book appointment
-            </Link>
+            <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+              <Link to={`/doctors/${d._id}`} className="btn btn-sm btn-block">
+                View profile
+              </Link>
+              <Link to={`/doctors/${d._id}/book`} className="btn btn-sm btn-block" style={{ backgroundColor: '#4CAF50' }}>
+                Book appointment
+              </Link>
+            </div>
           </article>
         ))}
       </div>

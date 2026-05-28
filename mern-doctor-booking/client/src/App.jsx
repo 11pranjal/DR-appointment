@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Doctors from './pages/Doctors';
+import PublicDoctorProfile from './pages/PublicDoctorProfile';
 import Posts from './pages/Posts';
 import Book from './pages/Book';
 import Track from './pages/Track';
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
           <Route path="/doctors" element={<Doctors />} />
+          <Route path="/doctors/:id" element={<PublicDoctorProfile />} />
           <Route path="/posts" element={<Posts />} />
           <Route path="/doctor/posts" element={<PrivateRoute roles={["doctor"]}><CreatePost /></PrivateRoute>} />
           <Route path="/doctors/:id/book" element={<Book />} />

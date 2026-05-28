@@ -21,7 +21,6 @@ export default function Navbar() {
       </Link>
       <nav>
         <Link to="/doctors">Browse</Link>
-        <Link to="/posts">Awareness</Link>
         {!user && (
           <>
             <Link to="/login">Login</Link>

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import api from '../api/client';
+import api, { SERVER_URL } from '../api/client';
 
 export default function Posts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedPostId, setExpandedPostId] = useState(null);
 
   useEffect(() => {
     api
@@ -17,17 +18,41 @@ export default function Posts() {
 
   return (
     <div className="page">
-      <h1>Awareness posts</h1>
+      <h1>All Awareness posts</h1>
       {posts.length === 0 && <p className="muted">No posts yet.</p>}
       <div className="doctor-grid">
-        {posts.map((p) => (
-          <div className="doctor-card card" key={p._id}>
-            {p.imageUrl && <img src={p.imageUrl} alt="post" style={{ width: '100%', borderRadius: 8 }} />}
-            <h3>{p.title}</h3>
-            <p className="muted">By Dr. {p.doctor?.firstName} {p.doctor?.lastName}</p>
-            <p>{p.content.slice(0, 220)}{p.content.length>220?'...':''}</p>
-          </div>
-        ))}
+        {posts.map((p) => {
+          const isExpanded = expandedPostId === p._id;
+          const shouldTruncate = p.content.length > 220;
+          const displayContent = isExpanded ? p.content : p.content.slice(0, 220);
+
+          return (
+            <div className="doctor-card card" key={p._id}>
+              {p.imagePath && (
+                <img
+                  src={`${SERVER_URL}/uploads/${p.imagePath}`}
+                  alt="post"
+                  style={{ width: '100%', borderRadius: 8 }}
+                />
+              )}
+              <h3>{p.title}</h3>
+              <p className="muted">By Dr. {p.doctor?.firstName} {p.doctor?.lastName}</p>
+              <p>
+                {displayContent}
+                {shouldTruncate && !isExpanded && '...'}
+              </p>
+              {shouldTruncate && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-ghost"
+                  onClick={() => setExpandedPostId(isExpanded ? null : p._id)}
+                >
+                  {isExpanded ? 'Show less' : 'Continue reading'}
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

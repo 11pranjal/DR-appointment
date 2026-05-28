@@ -1,18 +1,20 @@
 const express = require('express');
-// const { getPosts, createPost, getPostsByDoctor } = require('../controllers/postController');
 const { protect, authorize } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 const {
   getPosts,
   createPost,
   getPostsByDoctor,
-  updatePost
+  updatePost,
+  deletePost
 } = require('../controllers/postController');
 
 const router = express.Router();
 
 router.get('/', getPosts);
 router.get('/doctor/:id', getPostsByDoctor);
-router.post('/', protect, authorize('doctor'), createPost);
-router.put('/:id', protect, authorize('doctor'), updatePost);
+router.post('/', protect, authorize('doctor'), upload.single('image'), createPost);
+router.put('/:id', protect, authorize('doctor'), upload.single('image'), updatePost);
+router.delete('/:id', protect, authorize('doctor'), deletePost);
 
 module.exports = router;

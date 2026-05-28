@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import api from '../api/client';
+import api, { SERVER_URL } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
-const emptyPost = { title: '', imageUrl: '', content: '' };
+const emptyPost = { title: '', content: '' };
 
 export default function DoctorProfile() {
   const { user, setSession } = useAuth();
@@ -11,9 +11,11 @@ export default function DoctorProfile() {
   const [msg, setMsg] = useState('');
   const [posts, setPosts] = useState([]);
   const [postForm, setPostForm] = useState(emptyPost);
+  const [imageFile, setImageFile] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
   const [postLoading, setPostLoading] = useState(false);
   const [postMsg, setPostMsg] = useState('');
+  const [expandedPostId, setExpandedPostId] = useState(null);
 
   useEffect(() => {
     setProfile(user?.doctorProfile || {});
@@ -49,7 +51,19 @@ export default function DoctorProfile() {
   const resetPostForm = () => {
     setSelectedPost(null);
     setPostForm(emptyPost);
+    setImageFile(null);
     setPostMsg('');
+  };
+
+  const deletePost = async (postId) => {
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
+    try {
+      await api.delete(`/posts/${postId}`);
+      setPostMsg('Post deleted successfully');
+      await loadPosts();
+    } catch (err) {
+      setPostMsg(err.response?.data?.message || 'Could not delete post');
+    }
   };
 
   const savePost = async (e) => {
@@ -57,11 +71,22 @@ export default function DoctorProfile() {
     setPostLoading(true);
     setPostMsg('');
     try {
+      const formData = new FormData();
+      formData.append('title', postForm.title);
+      formData.append('content', postForm.content);
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
       if (selectedPost) {
-        await api.put(`/posts/${selectedPost._id}`, postForm);
+        await api.put(`/posts/${selectedPost._id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         setPostMsg('Post updated');
       } else {
-        await api.post('/posts', postForm);
+        await api.post('/posts', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         setPostMsg('Post created');
       }
       resetPostForm();
@@ -85,12 +110,24 @@ export default function DoctorProfile() {
           <input value={profile.specialization || ''} onChange={(e) => setProfile({ ...profile, specialization: e.target.value })} />
         </label>
         <label>
-          Consultation fee
-          <input type="number" value={profile.consultationFee || 0} onChange={(e) => setProfile({ ...profile, consultationFee: Number(e.target.value) })} />
+          Clinic / Hospital Name
+          <input value={profile.clinicName || ''} onChange={(e) => setProfile({ ...profile, clinicName: e.target.value })} />
         </label>
         <label>
           City
           <input value={profile.city || ''} onChange={(e) => setProfile({ ...profile, city: e.target.value })} />
+        </label>
+        <label>
+          Experience (e.g., "8 years")
+          <input value={profile.experience || ''} onChange={(e) => setProfile({ ...profile, experience: e.target.value })} />
+        </label>
+        <label>
+          Bio / About You
+          <textarea rows={4} value={profile.bio || ''} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} />
+        </label>
+        <label>
+          Consultation fee (Rs.)
+          <input type="number" value={profile.consultationFee || 0} onChange={(e) => setProfile({ ...profile, consultationFee: Number(e.target.value) })} />
         </label>
         <button className="btn btn-block" disabled={loading} type="submit">{loading ? 'Saving…' : 'Save'}</button>
         <button
@@ -123,9 +160,20 @@ export default function DoctorProfile() {
           />
         </label>
         <label>
-          Image URL
-          <input value={postForm.imageUrl} onChange={(e) => setPostForm({ ...postForm, imageUrl: e.target.value })} />
+          Upload image (.png, .jpg, .jpeg, .svg)
+          <input
+            type="file"
+            accept=".png,.jpg,.jpeg,.svg"
+            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+          />
         </label>
+        {imageFile && <p className="muted">Selected: {imageFile.name}</p>}
+        {selectedPost?.imagePath && !imageFile && (
+          <div style={{ marginBottom: '1rem' }}>
+            <p className="muted">Current image:</p>
+            <img src={`${SERVER_URL}/uploads/${selectedPost.imagePath}`} alt="current" style={{ maxWidth: '100%', borderRadius: 8 }} />
+          </div>
+        )}
         <label>
           Content
           <textarea
@@ -151,19 +199,53 @@ export default function DoctorProfile() {
         <p className="muted">No awareness posts yet. Create one above to show on your doctor profile.</p>
       ) : (
         <div className="doctor-grid">
-          {posts.map((post) => (
-            <div key={post._id} className="doctor-card card">
-              {post.imageUrl && <img src={post.imageUrl} alt={post.title} style={{ width: '100%', borderRadius: 8 }} />}
-              <h3>{post.title}</h3>
-              <p>{post.content.slice(0, 200)}{post.content.length > 200 ? '...' : ''}</p>
-              <button type="button" className="btn btn-ghost" onClick={() => {
-                setSelectedPost(post);
-                setPostForm({ title: post.title, imageUrl: post.imageUrl || '', content: post.content });
-              }}>
-                Edit post
-              </button>
-            </div>
-          ))}
+          {posts.map((post) => {
+            const isExpanded = expandedPostId === post._id;
+            const shouldTruncate = post.content.length > 200;
+            const displayContent = isExpanded ? post.content : post.content.slice(0, 200);
+
+            return (
+              <div key={post._id} className="doctor-card card">
+                {post.imagePath && <img src={`${SERVER_URL}/uploads/${post.imagePath}`} alt={post.title} style={{ width: '100%', borderRadius: 8 }} />}
+                <h3>{post.title}</h3>
+                <p>
+                  {displayContent}
+                  {shouldTruncate && !isExpanded && '...'}
+                </p>
+                {shouldTruncate && (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-ghost"
+                    onClick={() => setExpandedPostId(isExpanded ? null : post._id)}
+                  >
+                    {isExpanded ? 'Show less' : 'Continue reading'}
+                  </button>
+                )}
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-ghost"
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setPostForm({ title: post.title, content: post.content });
+                      setImageFile(null);
+                      setExpandedPostId(null);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-ghost"
+                    style={{ color: '#dc3545' }}
+                    onClick={() => deletePost(post._id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
