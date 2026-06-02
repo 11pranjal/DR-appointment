@@ -47,6 +47,13 @@ exports.register = asyncHandler(async (req, res) => {
     throw err;
   }
 
+  // Validate phone format if provided
+  if (phone && !/^\+977\d{10}$/.test(phone)) {
+    const err = new Error('Phone must be in format +977XXXXXXXXXX (10 digits after +977)');
+    err.statusCode = 400;
+    throw err;
+  }
+
   const exists = await User.findOne({ email: normalizedEmail });
   if (exists) {
     const err = new Error('Email already registered');

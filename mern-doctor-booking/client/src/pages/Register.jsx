@@ -91,8 +91,15 @@ export default function Register() {
           </div>
         </label>
         <label>
-          Phone
-          <input value={form.phone} onChange={set('phone')} />
+          Phone (format: +977XXXXXXXXXX)
+          <input
+            type="tel"
+            value={form.phone}
+            onChange={set('phone')}
+            placeholder="+977XXXXXXXXXX"
+            pattern="\+977\d{10}"
+            title="Phone must be in format +977XXXXXXXXXX (10 digits after +977)"
+          />
         </label>
         <label>
           I am a

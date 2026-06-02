@@ -20,7 +20,17 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, minlength: 6, select: false },
-    phone: { type: String, default: '' },
+    phone: {
+      type: String,
+      default: '',
+      validate: {
+        validator: function (v) {
+          if (!v) return true; // Allow empty for optional field
+          return /^\+977\d{10}$/.test(v);
+        },
+        message: 'Phone must be in format +977XXXXXXXXXX (10 digits after +977)',
+      },
+    },
     role: { type: String, enum: ['patient', 'doctor', 'admin'], default: 'patient' },
     isEmailVerified: { type: Boolean, default: false },
     emailVerificationToken: { type: String, select: false },
