@@ -30,7 +30,7 @@ export default function App() {
           <Route path="/doctors/:id" element={<PublicDoctorProfile />} />
           <Route path="/posts" element={<Posts />} />
           <Route path="/doctor/posts" element={<PrivateRoute roles={["doctor"]}><CreatePost /></PrivateRoute>} />
-          <Route path="/doctors/:id/book" element={<Book />} />
+          <Route path="/doctors/:id/book" element={<PrivateRoute roles={['patient']}><Book /></PrivateRoute>} />
           <Route path="/track" element={<Track />} />
           <Route
             path="/patient"
@@ -60,7 +60,7 @@ export default function App() {
         </Routes>
       </main>
       <footer className="footer">
-        <p>© 2026 MediBook. All rights reserved. © Pranjal Thapa</p>
+        <p>© 2026 MediBook | Pranjal Thapa</p>
       </footer>
     </>
   );

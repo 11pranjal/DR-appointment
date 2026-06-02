@@ -20,7 +20,7 @@ export default function Navbar() {
         Medi<span>Book</span>
       </Link>
       <nav>
-        <Link to="/doctors">Browse</Link>
+        {user && <Link to="/doctors">Browse</Link>}
         {!user && (
           <>
             <Link to="/login">Login</Link>
