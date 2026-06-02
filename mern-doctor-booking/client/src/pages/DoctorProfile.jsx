@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api, { SERVER_URL } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,6 +13,7 @@ export default function DoctorProfile() {
   const [postForm, setPostForm] = useState(emptyPost);
   const [imageFile, setImageFile] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
+  const postFormRef = useRef(null);
   const [postLoading, setPostLoading] = useState(false);
   const [postMsg, setPostMsg] = useState('');
   const [expandedPostId, setExpandedPostId] = useState(null);
@@ -106,7 +107,7 @@ export default function DoctorProfile() {
   return (
     <div className="page narrow">
       <h1>My profile</h1>
-      <form className="card form-card" onSubmit={save}>
+      <form className="card form-card" onSubmit={save} ref={postFormRef}>
         {msg && <p className="muted">{msg}</p>}
         {needsProfileCompletion && (
           <p className="info-banner">Please complete your profile so patients can see accurate doctor information.</p>
@@ -204,7 +205,7 @@ export default function DoctorProfile() {
       {posts.length === 0 ? (
         <p className="muted">No awareness posts yet. Create one above to show on your doctor profile.</p>
       ) : (
-        <div className="doctor-grid">
+        <div className="post-feed">
           {posts.map((post) => {
             const isExpanded = expandedPostId === post._id;
             const shouldTruncate = post.content.length > 200;
@@ -236,6 +237,7 @@ export default function DoctorProfile() {
                       setPostForm({ title: post.title, content: post.content });
                       setImageFile(null);
                       setExpandedPostId(null);
+                      postFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }}
                   >
                     Edit

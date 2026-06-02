@@ -26,14 +26,13 @@ export default function Book() {
   }, [id]);
 
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
       let res;
-      if (user?.role === 'patient') {
+      if (user?.role === 'patient' || user?.role === 'doctor') {
         res = await api.post('/appointments', {
           doctorId: id,
           scheduleDate: form.scheduleDate,
@@ -82,20 +81,7 @@ export default function Book() {
         Book Dr. {doctor.firstName} {doctor.lastName}
       </h1>
       <p className="muted">{doctor.doctorProfile?.specialization}</p>
-      {doctorPosts.length > 0 && (
-        <div className="card form-card">
-          <h2>Awareness posts by Dr. {doctor.firstName} {doctor.lastName}</h2>
-          {doctorPosts.map((post) => (
-            <div key={post._id} style={{ marginBottom: '1rem' }}>
-              <h3>{post.title}</h3>
-              {post.imageUrl && (
-                <img src={post.imageUrl} alt={post.title} style={{ width: '100%', borderRadius: 8, marginBottom: '0.75rem' }} />
-              )}
-              <p>{post.content}</p>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Awareness posts removed per request; booking form below */}
       <form className="card form-card" onSubmit={handleSubmit}>
         {error && <p className="error">{error}</p>}
         {!user && (
@@ -117,8 +103,11 @@ export default function Book() {
         {user?.role === 'patient' && (
           <p className="info-banner">Booking as {user.firstName} {user.lastName}</p>
         )}
-        {user && user.role !== 'patient' && (
-          <p className="error">Log in as a patient or book as guest (logout first).</p>
+        {user?.role === 'doctor' && (
+          <p className="info-banner">Booking as Dr. {user.firstName} {user.lastName}</p>
+        )}
+        {user && user.role !== 'patient' && user.role !== 'doctor' && (
+          <p className="error">Log in as a patient, doctor, or book as guest.</p>
         )}
         <label>
           Date (pick or type)
@@ -178,7 +167,7 @@ export default function Book() {
         <button
           type="submit"
           className="btn btn-block"
-          disabled={loading || (user && user.role !== 'patient')}
+          disabled={loading}
         >
           {loading ? 'Booking…' : 'Confirm booking'}
         </button>

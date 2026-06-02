@@ -225,6 +225,24 @@ body {
   transition: box-shadow 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
 }
 
+.search-input {
+  margin: 1.5rem 0 2rem;
+  display: block;
+}
+
+.doctor-grid {
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
+  justify-content: center;
+  max-width: 1080px;
+  margin: 0 auto 2rem;
+}
+
+.posts-grid {
+  grid-template-columns: 1fr;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
 .password-row {
   display: flex;
   align-items: center;
@@ -337,15 +355,37 @@ body {
 }
 
 .doctor-grid,
-.posts-grid {
+.posts-grid,
+.post-feed {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
 
-.posts-grid {
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+.doctor-grid {
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
+  justify-content: center;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.posts-grid,
+.post-feed {
+  grid-template-columns: 1fr;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+@media (max-width: 960px) {
+  .doctor-grid {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .doctor-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .doctor-card h3 {

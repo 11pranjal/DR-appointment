@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
 
 const DOCTORS_PER_PAGE = 3;
 
 export default function Doctors() {
+  const { user } = useAuth();
   const [doctors, setDoctors] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -53,9 +55,11 @@ export default function Doctors() {
               <Link to={`/doctors/${d._id}`} className="btn btn-sm btn-block">
                 View profile
               </Link>
-              <Link to={`/doctors/${d._id}/book`} className="btn btn-sm btn-block" style={{ backgroundColor: '#4CAF50' }}>
-                Book appointment
-              </Link>
+              {user?.role === 'patient' && (
+                <Link to={`/doctors/${d._id}/book`} className="btn btn-sm btn-block" style={{ backgroundColor: '#4CAF50' }}>
+                  Book appointment
+                </Link>
+              )}
             </div>
           </article>
         ))}
@@ -65,23 +69,25 @@ export default function Doctors() {
       )}
       {!loading && doctors.length > DOCTORS_PER_PAGE && (
         <div className="pagination-row">
-          <button
-            type="button"
-            className="btn btn-sm btn-ghost"
-            disabled={page === 1}
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          >
-            Previous
-          </button>
+          {page > 1 && (
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost"
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            >
+              Previous
+            </button>
+          )}
           <span>Page {page} of {Math.ceil(doctors.length / DOCTORS_PER_PAGE)}</span>
-          <button
-            type="button"
-            className="btn btn-sm btn-ghost"
-            disabled={page === Math.ceil(doctors.length / DOCTORS_PER_PAGE)}
-            onClick={() => setPage((prev) => Math.min(prev + 1, Math.ceil(doctors.length / DOCTORS_PER_PAGE)))}
-          >
-            Next
-          </button>
+          {page < Math.ceil(doctors.length / DOCTORS_PER_PAGE) && (
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost"
+              onClick={() => setPage((prev) => Math.min(prev + 1, Math.ceil(doctors.length / DOCTORS_PER_PAGE)))}
+            >
+              Next
+            </button>
+          )}
         </div>
       )}
     </div>

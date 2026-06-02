@@ -50,6 +50,12 @@ exports.createAppointment = asyncHandler(async (req, res) => {
     err.statusCode = 404;
     throw err;
   }
+  
+  if (!['patient', 'doctor'].includes(req.user.role)) {
+    const err = new Error('Only patients and doctors may book appointments');
+    err.statusCode = 403;
+    throw err;
+  }
 
   const appointment = await Appointment.create({
     doctor: doctorId,

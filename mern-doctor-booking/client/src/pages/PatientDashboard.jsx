@@ -93,6 +93,7 @@ export default function PatientDashboard() {
         </table>
         {list.length === 0 && <p className="muted pad">No appointments yet.</p>}
       </div>
+
     </div>
   );
 }
