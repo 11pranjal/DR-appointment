@@ -41,14 +41,15 @@ exports.register = asyncHandler(async (req, res) => {
   const { firstName, lastName, email, password, phone, role, doctorProfile } = req.body;
   const normalizedEmail = email?.toLowerCase().trim();
 
-  if (!firstName || !lastName || !normalizedEmail || !password) {
-    const err = new Error('Please provide firstName, lastName, email, password');
+  if (!firstName || !lastName || !normalizedEmail || !password || !phone) {
+    const err = new Error('Please provide firstName, lastName, email, password and phone');
     err.statusCode = 400;
     throw err;
   }
 
-  // Validate phone format if provided
-  if (phone && !/^\+977\d{10}$/.test(phone)) {
+  const cleanedPhone = phone.trim();
+  const normalizedPhone = /^\d{10}$/.test(cleanedPhone) ? `+977${cleanedPhone}` : cleanedPhone;
+  if (!/^\+977\d{10}$/.test(normalizedPhone)) {
     const err = new Error('Phone must be in format +977XXXXXXXXXX (10 digits after +977)');
     err.statusCode = 400;
     throw err;
@@ -69,7 +70,7 @@ exports.register = asyncHandler(async (req, res) => {
     lastName,
     email: normalizedEmail,
     password,
-    phone,
+    phone: normalizedPhone,
     role: safeRole,
     isEmailVerified: false,
     emailVerificationToken: token,
@@ -79,6 +80,7 @@ exports.register = asyncHandler(async (req, res) => {
         specialization: 'General Physician',
         consultationFee: 500,
         city: 'Your City',
+        profileComplete: false,
       },
     }),
   });

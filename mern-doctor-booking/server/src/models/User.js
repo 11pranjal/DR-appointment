@@ -10,6 +10,7 @@ const doctorProfileSchema = new mongoose.Schema(
     consultationFee: { type: Number, default: 500 },
     bio: { type: String, default: '' },
     availableDays: [{ type: String }],
+    profileComplete: { type: Boolean, default: false },
   },
   { _id: false }
 );

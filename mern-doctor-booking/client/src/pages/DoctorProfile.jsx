@@ -16,6 +16,7 @@ export default function DoctorProfile() {
   const [postLoading, setPostLoading] = useState(false);
   const [postMsg, setPostMsg] = useState('');
   const [expandedPostId, setExpandedPostId] = useState(null);
+  const needsProfileCompletion = !profile.profileComplete;
 
   useEffect(() => {
     setProfile(user?.doctorProfile || {});
@@ -38,8 +39,10 @@ export default function DoctorProfile() {
     setLoading(true);
     setMsg('');
     try {
-      const { data } = await api.put(`/users/${user._id}`, { doctorProfile: profile });
+      const submittedProfile = { ...profile, profileComplete: true };
+      const { data } = await api.put(`/users/${user._id}`, { doctorProfile: submittedProfile });
       setSession(localStorage.getItem('token'), data.data);
+      setProfile(submittedProfile);
       setMsg('Saved');
     } catch (err) {
       setMsg(err.response?.data?.message || 'Could not save');
@@ -105,6 +108,9 @@ export default function DoctorProfile() {
       <h1>My profile</h1>
       <form className="card form-card" onSubmit={save}>
         {msg && <p className="muted">{msg}</p>}
+        {needsProfileCompletion && (
+          <p className="info-banner">Please complete your profile so patients can see accurate doctor information.</p>
+        )}
         <label>
           Specialization
           <input value={profile.specialization || ''} onChange={(e) => setProfile({ ...profile, specialization: e.target.value })} />
@@ -160,10 +166,10 @@ export default function DoctorProfile() {
           />
         </label>
         <label>
-          Upload image (.png, .jpg, .jpeg, .svg)
+          Upload image
           <input
             type="file"
-            accept=".png,.jpg,.jpeg,.svg"
+            accept="image/*"
             onChange={(e) => setImageFile(e.target.files?.[0] || null)}
           />
         </label>

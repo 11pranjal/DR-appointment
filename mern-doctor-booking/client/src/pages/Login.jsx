@@ -13,6 +13,11 @@ export default function Login() {
   const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const shouldRedirectDoctorToProfile = (user) => {
+    if (!user || user.role !== 'doctor') return false;
+    return !user.doctorProfile?.profileComplete;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -21,8 +26,10 @@ export default function Login() {
     try {
       const user = await login(email, password);
       if (user.role === 'admin') navigate('/admin');
-      else if (user.role === 'doctor') navigate('/doctor');
-      else navigate('/patient');
+      else if (user.role === 'doctor') {
+        if (shouldRedirectDoctorToProfile(user)) navigate('/doctor/profile');
+        else navigate('/doctor');
+      } else navigate('/patient');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {

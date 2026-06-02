@@ -32,7 +32,7 @@ export default function Register() {
         lastName: form.lastName,
         email: form.email,
         password: form.password,
-        phone: form.phone,
+        phone: form.phone ? `+977${form.phone}` : '',
         role: form.role,
       };
       if (form.role === 'doctor') {
@@ -91,15 +91,20 @@ export default function Register() {
           </div>
         </label>
         <label>
-          Phone (format: +977XXXXXXXXXX)
-          <input
-            type="tel"
-            value={form.phone}
-            onChange={set('phone')}
-            placeholder="+977XXXXXXXXXX"
-            pattern="\+977\d{10}"
-            title="Phone must be in format +977XXXXXXXXXX (10 digits after +977)"
-          />
+          Phone (Nepal)
+          <div className="phone-input-row" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <span style={{ padding: '0.85rem 0.75rem', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '0.35rem' }}>+977</span>
+            <input
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+              placeholder="9841234567"
+              pattern="\d{10}"
+              title="Enter 10 digits after +977"
+              required
+              style={{ flex: 1 }}
+            />
+          </div>
         </label>
         <label>
           I am a
