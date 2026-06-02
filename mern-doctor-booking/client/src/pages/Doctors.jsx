@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/client';
 
+const DOCTORS_PER_PAGE = 3;
+
 export default function Doctors() {
   const [doctors, setDoctors] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const load = async () => {
@@ -13,6 +16,7 @@ export default function Doctors() {
       try {
         const { data } = await api.get('/doctors', { params: search ? { search } : {} });
         setDoctors(data.data);
+        setPage(1);
       } catch {
         setDoctors([]);
       } finally {
@@ -34,7 +38,7 @@ export default function Doctors() {
       />
       {loading && <p className="muted">Loading doctors…</p>}
       <div className="doctor-grid">
-        {doctors.map((d) => (
+        {doctors.slice((page - 1) * DOCTORS_PER_PAGE, page * DOCTORS_PER_PAGE).map((d) => (
           <article key={d._id} className="card doctor-card">
             <div className="doctor-avatar">{d.firstName[0]}</div>
             <h3>
@@ -58,6 +62,27 @@ export default function Doctors() {
       </div>
       {!loading && doctors.length === 0 && (
         <p className="muted">No doctors found. Run seed on the server first.</p>
+      )}
+      {!loading && doctors.length > DOCTORS_PER_PAGE && (
+        <div className="pagination-row">
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost"
+            disabled={page === 1}
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          >
+            Previous
+          </button>
+          <span>Page {page} of {Math.ceil(doctors.length / DOCTORS_PER_PAGE)}</span>
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost"
+            disabled={page === Math.ceil(doctors.length / DOCTORS_PER_PAGE)}
+            onClick={() => setPage((prev) => Math.min(prev + 1, Math.ceil(doctors.length / DOCTORS_PER_PAGE)))}
+          >
+            Next
+          </button>
+        </div>
       )}
     </div>
   );

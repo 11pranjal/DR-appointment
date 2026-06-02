@@ -336,11 +336,16 @@ body {
   margin-bottom: 0.75rem;
 }
 
-.doctor-grid {
+.doctor-grid,
+.posts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
+}
+
+.posts-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .doctor-card h3 {
@@ -388,6 +393,19 @@ body {
   background: #1a2a3d;
   color: #6eb5ff;
 }
+
+.pagination-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.pagination-row span {
+  font-weight: 600;
+}
+
 .badge-cancelled {
   background: #3d1a1a;
   color: var(--danger);
