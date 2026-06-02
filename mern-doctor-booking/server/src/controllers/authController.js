@@ -12,6 +12,8 @@ const publicUserFields = (user) => ({
   role: user.role,
   phone: user.phone,
   isEmailVerified: user.isEmailVerified,
+  isApproved: user.isApproved,
+  approvalStatus: user.approvalStatus,
   doctorProfile: user.doctorProfile,
 });
 
@@ -73,6 +75,9 @@ exports.register = asyncHandler(async (req, res) => {
     phone: normalizedPhone,
     role: safeRole,
     isEmailVerified: false,
+    isApproved: safeRole === 'doctor' ? false : true,
+    approvalStatus: safeRole === 'doctor' ? 'pending' : 'approved',
+    approvalRequestedAt: safeRole === 'doctor' ? new Date() : undefined,
     emailVerificationToken: token,
     emailVerificationExpires: expires,
     ...(safeRole === 'doctor' && {
@@ -118,6 +123,16 @@ exports.login = asyncHandler(async (req, res) => {
     throw err;
   }
 
+  if (user.role === 'doctor' && user.approvalStatus !== 'approved') {
+    const err = new Error(
+      user.approvalStatus === 'denied'
+        ? 'Your doctor account request was denied by admin.'
+        : 'Doctor account pending admin approval. Please wait for approval before logging in.'
+    );
+    err.statusCode = 403;
+    throw err;
+  }
+
   sendAuthResponse(res, user);
 });
 
@@ -138,6 +153,17 @@ exports.verifyEmail = asyncHandler(async (req, res) => {
   user.emailVerificationToken = undefined;
   user.emailVerificationExpires = undefined;
   await user.save();
+
+  if (user.role === 'doctor' && user.approvalStatus !== 'approved') {
+    return res.json({
+      success: true,
+      message:
+        user.approvalStatus === 'denied'
+          ? 'Email verified. Your doctor account request was denied by admin.'
+          : 'Email verified. Your doctor account is pending admin approval before you can log in.',
+      user: publicUserFields(user),
+    });
+  }
 
   sendAuthResponse(res, user);
 });

@@ -9,6 +9,7 @@ const publicUser = (user) => ({
   phone: user.phone,
   role: user.role,
   isEmailVerified: user.isEmailVerified,
+  isApproved: user.isApproved,
   doctorProfile: user.doctorProfile,
   deletionRequested: user.deletionRequested,
   deletionRequestedAt: user.deletionRequestedAt,
@@ -17,10 +18,11 @@ const publicUser = (user) => ({
 
 // GET /api/users — admin
 exports.getUsers = asyncHandler(async (req, res) => {
-  const { role, deletionRequested } = req.query;
+  const { role, deletionRequested, approvalStatus } = req.query;
   const filter = {};
   if (role) filter.role = role;
   if (deletionRequested !== undefined) filter.deletionRequested = deletionRequested === 'true';
+  if (approvalStatus) filter.approvalStatus = approvalStatus;
 
   const users = await User.find(filter).select('-password').sort({ createdAt: -1 });
   res.json({ success: true, count: users.length, data: users.map(publicUser) });
@@ -61,7 +63,16 @@ exports.updateUser = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  const { firstName, lastName, phone, doctorProfile, role, deletionRequested } = req.body;
+  const {
+    firstName,
+    lastName,
+    phone,
+    doctorProfile,
+    role,
+    isApproved,
+    approvalStatus,
+    deletionRequested,
+  } = req.body;
   if (firstName !== undefined) user.firstName = firstName;
   if (lastName !== undefined) user.lastName = lastName;
   if (phone !== undefined) user.phone = phone;
@@ -69,6 +80,15 @@ exports.updateUser = asyncHandler(async (req, res) => {
     user.doctorProfile = { ...user.doctorProfile.toObject(), ...doctorProfile };
   }
   if (isAdmin && role) user.role = role;
+  if (isAdmin && isApproved !== undefined) {
+    user.isApproved = isApproved;
+    if (isApproved) user.approvalStatus = 'approved';
+  }
+  if (isAdmin && approvalStatus) {
+    user.approvalStatus = approvalStatus;
+    if (approvalStatus === 'approved') user.isApproved = true;
+    if (approvalStatus === 'denied') user.isApproved = false;
+  }
   if (isAdmin && deletionRequested === false) {
     user.deletionRequested = false;
     user.deletionRequestedAt = undefined;

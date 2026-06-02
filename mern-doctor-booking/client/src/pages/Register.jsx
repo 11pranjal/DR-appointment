@@ -115,6 +115,7 @@ export default function Register() {
         </label>
         {form.role === 'doctor' && (
           <>
+            <p className="muted">Doctor accounts require admin approval before they can be activated.</p>
             <label>
               Specialization
               <input value={form.specialization} onChange={set('specialization')} />

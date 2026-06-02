@@ -34,6 +34,13 @@ const userSchema = new mongoose.Schema(
     },
     role: { type: String, enum: ['patient', 'doctor', 'admin'], default: 'patient' },
     isEmailVerified: { type: Boolean, default: false },
+    isApproved: { type: Boolean, default: true },
+    approvalStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'denied'],
+      default: 'approved',
+    },
+    approvalRequestedAt: { type: Date },
     emailVerificationToken: { type: String, select: false },
     emailVerificationExpires: { type: Date, select: false },
     doctorProfile: doctorProfileSchema,
