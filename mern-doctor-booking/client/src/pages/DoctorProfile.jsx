@@ -14,6 +14,7 @@ export default function DoctorProfile() {
   const [imageFile, setImageFile] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
   const postFormRef = useRef(null);
+  const awarenessSectionRef = useRef(null);
   const [postLoading, setPostLoading] = useState(false);
   const [postMsg, setPostMsg] = useState('');
   const [expandedPostId, setExpandedPostId] = useState(null);
@@ -155,7 +156,7 @@ export default function DoctorProfile() {
         </button>
       </form>
 
-      <h2>My awareness posts</h2>
+      <h2 ref={awarenessSectionRef}>My awareness posts</h2>
       <form className="card form-card" onSubmit={savePost}>
         {postMsg && <p className={postMsg.includes('could not') ? 'error' : 'muted'}>{postMsg}</p>}
         <label>
@@ -237,7 +238,7 @@ export default function DoctorProfile() {
                       setPostForm({ title: post.title, content: post.content });
                       setImageFile(null);
                       setExpandedPostId(null);
-                      postFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      awarenessSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }}
                   >
                     Edit

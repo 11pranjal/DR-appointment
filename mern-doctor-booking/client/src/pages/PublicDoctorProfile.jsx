@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api, { SERVER_URL } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 
 const POSTS_PER_PAGE = 2;
 
 export default function PublicDoctorProfile() {
   const { id } = useParams();
+  const { user } = useAuth();
   const [doctor, setDoctor] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,9 +79,11 @@ export default function PublicDoctorProfile() {
                 <strong>Bio:</strong> {doctor.doctorProfile.bio}
               </p>
             )}
-            <Link to={`/doctors/${doctor._id}/book`} className="btn">
-              Book appointment
-            </Link>
+            {user?.role !== 'doctor' && (
+              <Link to={`/doctors/${doctor._id}/book`} className="btn">
+                Book appointment
+              </Link>
+            )}
           </div>
         </div>
       </div>
