@@ -7,7 +7,7 @@ A small, friendly appointment booking system built with the MERN stack (MongoDB,
 - Appointment booking for patients 
 - Image upload support and simple pagination for lists
 
-This README explains what the project is, how it's organized, and how to set it up and run locally.
+
 
 **Quick links**
 - Server: `server/`
